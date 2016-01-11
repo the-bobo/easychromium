@@ -1,0 +1,60 @@
+# This is a sample. Rename to "config.txt" and place in same folder as easychromium.sh
+
+# API keys for building Chromium
+# keep your keys private, **DO NOT** commit these to github
+# replace NULL with the appropriate key
+# see https://sites.google.com/a/chromium.org/dev/developers/how-tos/api-keys for details
+
+# Chrome Remote Desktop API
+RemoteDesktop=NULL
+
+# Chrome Spelling API
+Spelling=NULL
+
+# Chrome Suggest API
+Suggest=NULL
+
+# Chrome Sync API
+Sync=NULL
+
+# Chrome Translate Element
+Translate=NULL
+
+# Chrome Web Store API
+WebStore=NULL
+
+# Google Maps Geolocation API 
+    # (requires enabling billing but is free to use; you can skip this one, in which case geolocation features of Chrome will not 
+    # work)
+MapsLocation=NULL
+
+# Safe Browsing API
+    # while enhancing security against malware and phishing, this feature spies on you:
+    # see "Cookies from Nowhere" - http://ashkansoltani.org/2012/02/25/cookies-from-nowhere/
+    # and "NSA uses Google cookies to pinpoint targets for hacking" - https://www.washingtonpost.com/news/the-switch/wp/2013/12/10/nsa-uses-google-cookies-to-pinpoint-targets-for-hacking/
+
+MotherShouldITrustTheGovernment=NULL
+
+# Speech API
+Speech=NULL
+
+# Google Maps Time Zone API
+MapsTimeZone=NULL
+
+# Google Cloud Messaging for Chrome
+CloudMessaging=NULL
+
+# Drive API (Optional, enable this for Files.app on Chrome OS and SyncFileSystem API)
+DriveAPI=NULL
+
+# Google Now For Chrome API (Optional, enabled to show Google Now cards)
+Now=NULL
+
+# Google+ API
+Plus=NULL
+
+#Chrome OS Hardware ID API (Optional, Chrome OS)
+HardwareID=NULL
+
+# Device Registration API (Optional, Chrome OS)
+DeviceRegistration=NULL

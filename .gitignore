@@ -1,0 +1,5 @@
+# ignore config file with secrets
+config.txt
+
+# ignore others
+.DS_Store
