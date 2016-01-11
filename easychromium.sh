@@ -30,36 +30,46 @@ echo "=========New Build Attempt=========" | tee -a $LOGFILE
 OS_VERSION=$(sw_vers -productVersion)
 echo "OS X Version "$OS_VERSION" detected" | tee -a $LOGFILE
 
-# pre-build checklist, use git --version etc.:
-	# has git >= 2.2.1?
 
-# check software versions for compatibility 
+
+#########################
+# SOFTWARE VERSION CHECKS
+#########################
 
 ###
-# Based on version checker code cc by-sa 3.0
+# Based in part on version checker code cc by-sa 3.0
 # Courtesy http://stackoverflow.com/users/1032785/jordanm at http://stackoverflow.com/a/11602790
 ###
+
+# git >= 2.2.1
 # @#@ - make this automatically upgrade git , see comments below
-# @#@ - make this output git path (which git) to LOGFILE
+# @#@ - make this output git path (which git) to LOGFILE - which may behave unexpectedly: http://stackoverflow.com/a/677212
 
-for cmd in git; do
-	[[ $("$cmd" --version) =~ ([0-9][.][0-9.]*) ]] && version="${BASH_REMATCH[1]}"
-	if ! awk -v ver="$version" 'BEGIN { if (ver < 2.2.1) exit 1; }'; then
-		echo 'ERROR: '$cmd' version 2.2.1 or higher required' | tee -a $LOGFILE
-	fi
-done
+if command -v git >/dev/null 2>&1; then
 
+	for cmd in git; do
+		[[ $("$cmd" --version) =~ ([0-9][.][0-9.]*) ]] && version="${BASH_REMATCH[1]}"
+		if ! awk -v ver="$version" 'BEGIN { if (ver < 2.2.1) exit 1; }'; then
+			echo 'ERROR: '$cmd' version 2.2.1 or higher required' | tee -a $LOGFILE
+			exit 1;
+		fi
+	done
+
+else 
+	echo "ERROR: git is not installed, please install Xcode and xcode-cli to get git, or brew install git" | tee -a $LOGFILE
+	exit 1;
+fi
 		# git version --> ./easychromium.log
 		# git path --> ./easychromium.log
-
 		# if git not detected, advise user to install Xcode
-
 		# else, if git detected
 				# which git
 					# if /usr/local/bin/git stdout "attempting to update git using homebrew" and --> LOGFILE
 					# brew update && brew upgrade git
 					# else if /usr/bin/git
 					# stdout "STOPPING - you need to update xcode to 5+ before proceeding, recommended version is 6.4:  https://developer.apple.com/support/xcode/" and --> ./easychromium.log
+
+# XCode >= 5
 
 # should probably check for xcode first, then check for xcode-cli
 
