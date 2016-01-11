@@ -1,6 +1,22 @@
-curl --cookie cookies.txt -O -C - http://adcdownload.apple.com/Developer_Tools/Xcode_7.2/Xcode_7.2.dmg
+You need to download XCode (5+).
 
-use a cookie exporter: 
+Be aware, this download takes forever (>= 5 hours). You will need an Apple Developer account (free) to sign in.
+
+You should use curl from the command line to download XCode since it permits resuming from partial downloads,
+and is faster. 
+
+You will need a cookie exporter:
 Firefox - https://addons.mozilla.org/en-US/firefox/addon/cookie-exporter/
 
 Chrome (but why would you be using this if you're trying to build Chromium?) - https://chrome.google.com/webstore/detail/cookiestxt/njabckikapfpffapmjgojcnbfjonfjfg?hl=en
+
+After signing in to the Apple developer site, export your cookies to the folder you want to download 
+XCode into and name them "cookies.txt" Then, use the following command:
+
+curl --cookie cookies.txt -O -C - http://adcdownload.apple.com/Developer_Tools/Xcode_7.2/Xcode_7.2.dmg
+
+--cookie cookies.txt: tells curl to look in cookies.txt for cookies
+-O: tells curl to name the output file identically to its name on the remote host (so we'll save this file as Xcode_7.2.dmg)
+-C : (note the space after the C) tells curl to resume automatically from the last point in the file, the space indicates
+we want curl to figure out the byte offset instead of specifying one ourselves
+- url: (note the space after the -) tells curl where to fetch the file from 
