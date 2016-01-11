@@ -5,6 +5,8 @@ Be aware, this download takes forever (>= 5 hours). You will need an Apple Devel
 You should use curl from the command line to download XCode since it permits resuming from partial downloads,
 and is faster. 
 
+Make sure you set System Preferences -> Energy Saver to PREVENT computer from sleeping when display turns off.
+
 You will need a cookie exporter:
 Firefox - https://addons.mozilla.org/en-US/firefox/addon/cookie-exporter/
 
