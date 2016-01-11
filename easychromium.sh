@@ -8,23 +8,30 @@
 # Suggestion: /Applications/Chromium
 
 # TO DO
-# maybe just output everything to stdout and ./easychromium.log
-# should append a newline after every write to ./easychromium.log
+# output everything to stdout and ./easychromium.log
 # search for @#@ as an in-line to do marker thoughout the script
 
 ####################
 # PRE-BUILD BEGIN
 ####################
 
-# check OS X version, assign a macro flag to it
-	# OSX = MACRO
+# initialize logfile, appends by default and creates if not found
+
+LOGFILE="./easychromium.log"
+
+echo "=========New Build Attempt=========" | tee -a $LOGFILE
+echo $(date) | tee -a ./easychromium.log
+echo "=========New Build Attempt=========" | tee -a $LOGFILE
+
+# check OS X version, can be used in futrue for choosing different code flows on basis of OS version
+
+OS_VERSION=$(sw_vers -productVersion)
+
+echo "OS X Version "$OS_VERSION" detected" | tee -a $LOGFILE
 
 # pre-build checklist, use git --version etc.:
-	# logfile already exists?
-		# if yes, append with =====current timestamp==== on a newline, 
-			# else, create ./easychromium.log
-		# "This version of OS X detected: MACRO" --> ./easychromium.log
 	# has git >= 2.2.1?
+
 		# git version --> ./easychromium.log
 		# git path --> ./easychromium.log
 			# if git not detected, stdout "git not detected, please install xcode-cli: do not "get xcode" just click Okay"
@@ -70,7 +77,7 @@
 
 # @#@ should check to see if depot_tools already exists / if needs updating
 # download depot_tools, see: http://dev.chromium.org/developers/how-tos/install-depot-tools
-echo "Downloading depot_tools from https://chromium.googlesource.com/chromium/tools/depot_tools.git" | tee -a ./easychromium.log
+echo "Downloading depot_tools from https://chromium.googlesource.com/chromium/tools/depot_tools.git" | tee -a $LOGFILE
 git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
 
 

@@ -3,3 +3,4 @@ config.txt
 
 # ignore others
 .DS_Store
+easychromium.log
