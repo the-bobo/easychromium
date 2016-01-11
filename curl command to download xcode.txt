@@ -1,0 +1,6 @@
+curl --cookie cookies.txt -O -C - http://adcdownload.apple.com/Developer_Tools/Xcode_7.2/Xcode_7.2.dmg
+
+use a cookie exporter: 
+Firefox - https://addons.mozilla.org/en-US/firefox/addon/cookie-exporter/
+
+Chrome (but why would you be using this if you're trying to build Chromium?) - https://chrome.google.com/webstore/detail/cookiestxt/njabckikapfpffapmjgojcnbfjonfjfg?hl=en
