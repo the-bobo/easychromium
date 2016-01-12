@@ -8,7 +8,7 @@
 # Suggestion: /Applications/Chromium
 
 # TO DO
-# output everything to stdout and ./easychromium.log
+# output everything to stdout and $LOGFILE
 # add ccache support - check for existence, proper versioning, update/patch to correct version, compile with it
 # search for @#@ as an in-line to do marker thoughout the script
 
@@ -60,15 +60,15 @@ else
 	echo "ERROR: git is not installed, please install Xcode and xcode-cli to get git, or brew install git" | tee -a $LOGFILE
 	exit 1;
 fi
-		# git version --> ./easychromium.log
-		# git path --> ./easychromium.log
+		# git version --> $LOGFILE
+		# git path --> $LOGFILE
 		# if git not detected, advise user to install Xcode
 		# else, if git detected
 				# which git
 					# if /usr/local/bin/git stdout "attempting to update git using homebrew" and --> LOGFILE
 					# brew update && brew upgrade git
 					# else if /usr/bin/git
-					# stdout "STOPPING - you need to update xcode to 5+ before proceeding, recommended version is 6.4:  https://developer.apple.com/support/xcode/" and --> ./easychromium.log
+					# stdout "STOPPING - you need to update xcode to 5+ before proceeding, recommended version is 6.4:  https://developer.apple.com/support/xcode/" and --> $LOGFILE
 
 # XCode >= 5
 	# @#@ need to validate this works when user has Xcode 5.0 installed - should we check against 5.0 or 5.0.0?
@@ -104,11 +104,11 @@ fi
 
 # has xcode-cli?
 	# @#@ need to implement xcode-cli testing and path output to $LOGFILE
-		# xcode-cli version --> ./easychromium.log
-		# xcode-cli path --> ./easychromium.log
+		# xcode-cli version --> $LOGFILE
+		# xcode-cli path --> $LOGFILE
 			# else, xcode-select --install
-			# installed xcode-cli using xcode-select --install --> ./easychromium.log
-			# xcode-cli version and path --> ./easychromium.log
+			# installed xcode-cli using xcode-select --install --> $LOGFILE
+			# xcode-cli version and path --> $LOGFILE
 
 # has depot_tools? (check by trying 'gclient')
 	# @#@ need to output depot_tools version and path to $LOGFILE
@@ -134,15 +134,15 @@ else
 fi
 
 
-		# depot_tools version --> ./easychromium.log
-		# depot_tools path --> easychromium.log
-			# else, "no depot_tools detected, installing depot_tools" --> ./easychromium.log
+		# depot_tools version --> $LOGFILE
+		# depot_tools path --> $LOGFILE
+			# else, "no depot_tools detected, installing depot_tools" --> $LOGFILE
 			# 
 
 # config file inputs
 	# config file exists? (./config.txt) 
-		# if no, stdout "no configuration file found, expected ./config.txt \n using defaults, no API's will be loaded" --> ./easychromium.log
-		# if yes, output "configuration file found, using ./config.txt" --> ./easychromium.log
+		# if no, stdout "no configuration file found, expected ./config.txt \n using defaults, no API's will be loaded" --> $LOGFILE
+		# if yes, output "configuration file found, using ./config.txt" --> $LOGFILE
 
 ####################
 ####################
