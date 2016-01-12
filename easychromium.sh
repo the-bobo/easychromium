@@ -9,6 +9,7 @@
 
 # TO DO
 # output everything to stdout and ./easychromium.log
+# add ccache support - check for existence, proper versioning, update/patch to correct version, compile with it
 # search for @#@ as an in-line to do marker thoughout the script
 
 ####################
@@ -70,8 +71,36 @@ fi
 					# stdout "STOPPING - you need to update xcode to 5+ before proceeding, recommended version is 6.4:  https://developer.apple.com/support/xcode/" and --> ./easychromium.log
 
 # XCode >= 5
+# @#@ need to validate this works when user has Xcode 5.0 installed - should we check against 5.0 or 5.0.0?
+# @#@ need to validate the if logic works for users with neither xcode nor xcode-cli installed
+# @#@ need to output path of XCode to logfile (useful for users with multiple XCode versions installed, eventually
+#	we can enable user selecting specific versino of Xcode to build with by providing a path maybe?)
 
-# should probably check for xcode first, then check for xcode-cli
+# sample response when Xcode is not installed but xcode-cli is:
+# xcode-select: error: tool 'xcodebuild' requires Xcode, but active developer directory '/Library/Developer/CommandLineTools' is a command line tools instance
+# sample response when Xcode and xcode-cli are both missing:
+# xcode-select: note: no developer tools were found at '/Applications/Xcode.app', requesting install. Choose an option in the dialog to download the command line developer tools.
+
+
+XCODE_CHECK="$(command xcodebuild 2>&1)"
+if [[ "$XCODE_CHECK"=~"error" ]]; then
+	echo "Xcode not found, please see xcodehelp.txt in this repository and install Xcode." | tee -a $LOGFILE
+	exit 1;
+if [[ "$XCODE_CHECK"=~"note" ]]; then
+	echo "Xcode and xcode-cli not found, please see xcodehelp.txt in this repository and install Xcode." | tee -a $LOGFILE
+	exit 1;
+else
+	echo "Xcode detected, testing version" | tee -a LOGFILE
+	for cmd in xcodebuild; do
+		[[ $("$cmd" -version) =~ ([0-9][.][0-9.]*) ]] && version="${BASH_REMATCH[1]}"
+		if ! awk -v ver="$version" 'BEGIN { if (ver < 5.0) exit 1; }'; then
+			echo 'ERROR: '$cmd' version 5.0 or higher required' | tee -a $LOGFILE
+			echo 'Version detected was: '$version | tee -a $LOGFILE
+			exit 1;
+		fi
+done
+fi
+
 
 	# has xcode-cli?
 
