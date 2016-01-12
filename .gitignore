@@ -4,3 +4,6 @@ config.txt
 # ignore others
 .DS_Store
 easychromium.log
+
+# google depot_tools folder
+depot_tools

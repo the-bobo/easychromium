@@ -43,10 +43,11 @@ echo "OS X Version "$OS_VERSION" detected" | tee -a $LOGFILE
 ###
 
 # git >= 2.2.1
-# @#@ - make this automatically upgrade git , see comments below
-# @#@ - make this output git path (which git) to LOGFILE - which may behave unexpectedly: http://stackoverflow.com/a/677212
+	# @#@ - make this automatically upgrade git , see comments below
+	# @#@ - make this output git path (which git) to LOGFILE - which may behave unexpectedly: http://stackoverflow.com/a/677212
+	# @#@ - do i need commmand -v git or command -V git? which will work correctly on a system without git?
 
-if command -v git >/dev/null 2>&1; then
+if command -V git >/dev/null 2>&1; then
 
 	for cmd in git; do
 		[[ $("$cmd" --version) =~ ([0-9][.][0-9.]*) ]] && version="${BASH_REMATCH[1]}"
@@ -70,16 +71,15 @@ fi
 					# stdout "STOPPING - you need to update xcode to 5+ before proceeding, recommended version is 6.4:  https://developer.apple.com/support/xcode/" and --> ./easychromium.log
 
 # XCode >= 5
-# @#@ need to validate this works when user has Xcode 5.0 installed - should we check against 5.0 or 5.0.0?
-# @#@ need to validate the if logic works for users with neither xcode nor xcode-cli installed
-# @#@ need to output path of XCode to logfile (useful for users with multiple XCode versions installed, eventually
-#	we can enable user selecting specific versino of Xcode to build with by providing a path maybe?)
+	# @#@ need to validate this works when user has Xcode 5.0 installed - should we check against 5.0 or 5.0.0?
+	# @#@ need to validate the if logic works for users with neither xcode nor xcode-cli installed
+	# @#@ need to output path of XCode to logfile (useful for users with multiple XCode versions installed, eventually
+	#	we can enable user selecting specific versino of Xcode to build with by providing a path maybe?)
 
-# sample response when Xcode is not installed but xcode-cli is:
-# xcode-select: error: tool 'xcodebuild' requires Xcode, but active developer directory '/Library/Developer/CommandLineTools' is a command line tools instance
-# sample response when Xcode and xcode-cli are both missing:
-# xcode-select: note: no developer tools were found at '/Applications/Xcode.app', requesting install. Choose an option in the dialog to download the command line developer tools.
-
+	# sample response when Xcode is not installed but xcode-cli is:
+	# xcode-select: error: tool 'xcodebuild' requires Xcode, but active developer directory '/Library/Developer/CommandLineTools' is a command line tools instance
+	# sample response when Xcode and xcode-cli are both missing:
+	# xcode-select: note: no developer tools were found at '/Applications/Xcode.app', requesting install. Choose an option in the dialog to download the command line developer tools.
 
 XCODE_CHECK="$(command xcodebuild 2>&1)"
 if [[ "$XCODE_CHECK"=~"error" ]]; then
@@ -102,21 +102,29 @@ else
 	done
 fi
 
-
-	# has xcode-cli?
-
-
-
+# has xcode-cli?
+	# @#@ need to implement xcode-cli testing and path output to $LOGFILE
 		# xcode-cli version --> ./easychromium.log
 		# xcode-cli path --> ./easychromium.log
 			# else, xcode-select --install
 			# installed xcode-cli using xcode-select --install --> ./easychromium.log
 			# xcode-cli version and path --> ./easychromium.log
-	# has xcode? (5+ to 6.4, 7.x seems buggy)
-		# xcode version --> ./easychromium.log
-		# xcode path (location on disk of xcode.app?) --> ./easychromium.log
-			# else, "no xcode install detected, please install xcode 5+, recommended is 6.4 : https://developer.apple.com/support/xcode/" --> ./easychromium.log
-	# has depot_tools? (check by trying 'gclient')
+
+# has depot_tools? (check by trying 'gclient')
+	# @#@ need to output depot_tools version and path to $LOGFILE
+	# @#@ is there version checking we need to do here?
+	# see http://dev.chromium.org/developers/how-tos/install-depot-tools 
+	# see http://dev.chromium.org/developers/how-tos/depottools
+	# see http://commondatastorage.googleapis.com/chrome-infra-docs/flat/depot_tools/docs/html/depot_tools.html
+
+DEPOT_CHECK="$(command -V gclient 2>&1)"
+if [[ DEPOT_CHECK=~"not found" ]]; then
+	echo "depot_tools not found" | tee -a $LOGFILE
+else
+	echo "found"
+fi
+
+
 		# depot_tools version --> ./easychromium.log
 		# depot_tools path --> easychromium.log
 			# else, "no depot_tools detected, installing depot_tools" --> ./easychromium.log
