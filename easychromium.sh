@@ -20,7 +20,7 @@
 
 # initialize logfile, appends by default and creates if not found
 
-LOGFILE="./easychromium.log"
+LOGFILE="./logeasychromium.log"
 
 echo "=========New Build Attempt=========" | tee -a $LOGFILE
 echo $(date) | tee -a ./easychromium.log
@@ -55,7 +55,6 @@ if command -v git >/dev/null 2>&1; then
 			exit 1;
 		fi
 	done
-
 else 
 	echo "ERROR: git is not installed, please install Xcode and xcode-cli to get git, or brew install git" | tee -a $LOGFILE
 	exit 1;
@@ -86,9 +85,11 @@ XCODE_CHECK="$(command xcodebuild 2>&1)"
 if [[ "$XCODE_CHECK"=~"error" ]]; then
 	echo "Xcode not found, please see xcodehelp.txt in this repository and install Xcode." | tee -a $LOGFILE
 	exit 1;
-if [[ "$XCODE_CHECK"=~"note" ]]; then
+
+elif [[ "$XCODE_CHECK"=~"note" ]]; then
 	echo "Xcode and xcode-cli not found, please see xcodehelp.txt in this repository and install Xcode." | tee -a $LOGFILE
 	exit 1;
+
 else
 	echo "Xcode detected, testing version" | tee -a LOGFILE
 	for cmd in xcodebuild; do
@@ -98,7 +99,7 @@ else
 			echo 'Version detected was: '$version | tee -a $LOGFILE
 			exit 1;
 		fi
-done
+	done
 fi
 
 
@@ -141,8 +142,8 @@ fi
 
 # @#@ should check to see if depot_tools already exists / if needs updating
 # download depot_tools, see: http://dev.chromium.org/developers/how-tos/install-depot-tools
-echo "Downloading depot_tools from https://chromium.googlesource.com/chromium/tools/depot_tools.git" | tee -a $LOGFILE
-git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
+#echo "Downloading depot_tools from https://chromium.googlesource.com/chromium/tools/depot_tools.git" | tee -a $LOGFILE
+#git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
 
 
 
