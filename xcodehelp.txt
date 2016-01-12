@@ -1,4 +1,11 @@
-You need to download XCode (5+).
+You are here either because you don't have Xcode 5+ installed, don't have xcode-cli installed, or both.
+
+If you already have Xcode 5+ installed but not xcode-cli, try: 
+	xcode-select --install
+
+If you need to update Xcode, please update it.
+
+If you need to install Xcode, please read below:
 
 Be aware, this download takes forever (>= 5 hours). You will need an Apple Developer account (free) to sign in.
 
@@ -10,7 +17,7 @@ Make sure you set System Preferences -> Energy Saver to PREVENT computer from sl
 You will need a cookie exporter:
 Firefox - https://addons.mozilla.org/en-US/firefox/addon/cookie-exporter/
 
-Chrome (but why would you be using this if you're trying to build Chromium?) - https://chrome.google.com/webstore/detail/cookiestxt/njabckikapfpffapmjgojcnbfjonfjfg?hl=en
+Chrome - https://chrome.google.com/webstore/detail/cookiestxt/njabckikapfpffapmjgojcnbfjonfjfg?hl=en
 
 After signing in to the Apple developer site, export your cookies to the folder you want to download 
 XCode into and name them "cookies.txt" Then, use the following command:
