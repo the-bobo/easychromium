@@ -23,7 +23,7 @@
 LOGFILE="./logeasychromium.log"
 
 echo "=========New Build Attempt=========" | tee -a $LOGFILE
-echo $(date) | tee -a ./easychromium.log
+echo $(date) | tee -a $LOGFILE
 echo "=========New Build Attempt=========" | tee -a $LOGFILE
 
 # check OS X version, can be used in future for choosing different code flows on basis of OS version
@@ -119,9 +119,18 @@ fi
 
 DEPOT_CHECK="$(command -V gclient 2>&1)"
 if [[ DEPOT_CHECK=~"not found" ]]; then
-	echo "depot_tools not found" | tee -a $LOGFILE
+	echo "depot_tools not found, try checking your PATH" | tee -a $LOGFILE
+	echo "Alternatively, easychromium can try to install depot_tools for you." | tee -a $LOGFILE
+	read -r -p "Install depot_tools? (Y/n) " response
+	if [[ $response =~ ^([yY][eE][sS]|[yY])$ ]]; then
+		echo "trying to install depot_tools" | tee -a $LOGFILE
+		# insert install for depot_tools, see http://dev.chromium.org/developers/how-tos/install-depot-tools
+	else
+		echo "no depot_tools found, user chose not to auto-install, exiting" | tee -a $LOGFILE
+		exit 1;
+	fi
 else
-	echo "found"
+	echo "depot_tools found, proceeding" | tee -a $LOGFILE
 fi
 
 

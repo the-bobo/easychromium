@@ -1,0 +1,19 @@
+=========New Build Attempt=========
+=========New Build Attempt=========
+OS X Version 10.11.2 detected
+Xcode not found, please see xcodehelp.txt in this repository and install Xcode.
+=========New Build Attempt=========
+=========New Build Attempt=========
+OS X Version 10.11.2 detected
+Xcode not found, please see xcodehelp.txt in this repository and install Xcode.
+depot_tools not found, try checking your PATH
+Alternatively, easychromium can try to install depot_tools for you.
+trying to install depot_tools
+=========New Build Attempt=========
+Mon Jan 11 23:24:03 EST 2016
+=========New Build Attempt=========
+OS X Version 10.11.2 detected
+Xcode not found, please see xcodehelp.txt in this repository and install Xcode.
+depot_tools not found, try checking your PATH
+Alternatively, easychromium can try to install depot_tools for you.
+no depot_tools found, exiting
