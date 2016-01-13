@@ -37,6 +37,8 @@ echo "OS X Version "$OS_VERSION" detected" | tee -a $LOGFILE
 # SOFTWARE VERSION CHECKS
 #########################
 
+echo "Beginning software version checks" | tee -a $LOGFILE
+
 ###
 # Based in part on version checker code cc by-sa 3.0
 # Courtesy http://stackoverflow.com/users/1032785/jordanm at http://stackoverflow.com/a/11602790
@@ -123,8 +125,9 @@ if [[ DEPOT_CHECK=~"not found" ]]; then
 	echo "Alternatively, easychromium can try to install depot_tools for you." | tee -a $LOGFILE
 	read -r -p "Install depot_tools? (Y/n) " response
 	if [[ $response =~ ^([yY][eE][sS]|[yY])$ ]]; then
-		echo "trying to install depot_tools" | tee -a $LOGFILE
-		# insert install for depot_tools, see http://dev.chromium.org/developers/how-tos/install-depot-tools
+		echo "Trying to install depot_tools, see see http://dev.chromium.org/developers/how-tos/install-depot-tools for more" | tee -a $LOGFILE
+		echo "Downloading depot_tools from https://chromium.googlesource.com/chromium/tools/depot_tools.git" | tee -a $LOGFILE
+		#git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
 	else
 		echo "no depot_tools found, user chose not to auto-install, exiting" | tee -a $LOGFILE
 		exit 1;
@@ -138,6 +141,16 @@ fi
 		# depot_tools path --> $LOGFILE
 			# else, "no depot_tools detected, installing depot_tools" --> $LOGFILE
 			# 
+
+echo "Software checks finished" | tee -a $LOGFILE
+
+echo "Checking for config file ./config.txt" | tee -a $LOGFILE
+
+if [[ -f "./config.txt" ]]; then 
+	echo "./config.txt exists"
+else
+	echo "does not exist"
+fi
 
 # config file inputs
 	# config file exists? (./config.txt) 
@@ -156,12 +169,6 @@ fi
 # BUILD SETUP BEGIN
 ####################
 ####################
-
-# @#@ should check to see if depot_tools already exists / if needs updating
-# download depot_tools, see: http://dev.chromium.org/developers/how-tos/install-depot-tools
-#echo "Downloading depot_tools from https://chromium.googlesource.com/chromium/tools/depot_tools.git" | tee -a $LOGFILE
-#git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
-
 
 
 ####################
