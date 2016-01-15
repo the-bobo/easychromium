@@ -3,7 +3,7 @@ config.txt
 
 # ignore others
 .DS_Store
-easychromium.log
+logeasychromium.log
 
 # google depot_tools folder
 depot_tools

@@ -128,6 +128,21 @@ if [[ DEPOT_CHECK=~"not found" ]]; then
 		echo "Trying to install depot_tools, see see http://dev.chromium.org/developers/how-tos/install-depot-tools for more" | tee -a $LOGFILE
 		echo "Downloading depot_tools from https://chromium.googlesource.com/chromium/tools/depot_tools.git" | tee -a $LOGFILE
 		#git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
+		if [[ $? -eq 0 ]]; then
+			echo "git clone successful" | tee -a $LOGFILE
+		else
+			echo "git clone of depot_tools failed, exiting" | tee -a $LOGFILE
+			exit 1;
+		fi
+		
+		echo "Exporting depot_tools to PATH" | tee -a $LOGFILE
+		export PATH=`pwd`/depot_tools:"$PATH"
+		if [[ $? - eq 0 ]]; then
+			echo "PATH updated to $PATH" | tee -a $LOGFILE
+		else
+			echo "Error updating PATH with depot_tools, exiting"
+			exit 1;
+		fi
 	else
 		echo "no depot_tools found, user chose not to auto-install, exiting" | tee -a $LOGFILE
 		exit 1;
@@ -144,24 +159,14 @@ fi
 
 echo "Software checks finished" | tee -a $LOGFILE
 
-echo "Checking for config file ./config.txt" | tee -a $LOGFILE
-
-if [[ -f "./config.txt" ]]; then 
-	echo "./config.txt exists"
-else
-	echo "does not exist"
-fi
-
-# config file inputs
-	# config file exists? (./config.txt) 
-		# if no, stdout "no configuration file found, expected ./config.txt \n using defaults, no API's will be loaded" --> $LOGFILE
-		# if yes, output "configuration file found, using ./config.txt" --> $LOGFILE
 
 ####################
 ####################
 # PRE-BUILD COMPLETE
 ####################
 ####################
+
+echo "#### PRE-BUILD COMPLETE ####" | tee -a $LOGFILE
 
 
 ####################
@@ -170,7 +175,27 @@ fi
 ####################
 ####################
 
+echo "#### BUILD SETUP BEGINNING ####" | tee -a $LOGFILE
+
+echo "Checking for config file ./config.txt" | tee -a $LOGFILE
+
+if [[ -f "./config.txt" ]]; then 
+	echo "./config.txt exists, but integration not supported yet, not using - no google APIs will be installed" | tee -a $LOGFILE
+	# @#@ to do - implement scrubbing config.txt for paramaters into ./build/gyp_chromium or a GYP_DEFINES environment variable
+else
+	echo "./config.txt does not exist, proceeding with defaults - no google APIs will be installed" | tee -a $LOGFILE
+fi
+
+
+echo "Checking waterfall to confirm Tree is Open - this is not implemented yet, assuimg Tree OPEN" | tee -a $LOGFILE
+	# @#@ see https://build.chromium.org/p/chromium/console and https://build.chromium.org/p/chromium/json/help
+	# appears to have a JSON API but not sure how to poll it
+	# need to implement automatic confirmation of open status on tree before proceeding 
+
+
 
 ####################
 # BUILD SETUP END
 ####################
+
+echo "#### BUILD SETUP COMPLETE ####" | tee -a $LOGFILE
