@@ -9,6 +9,7 @@
 # After it builds cp [PATH TO YOUR CHROMIUM DIRECTORY]/Chromium/src/out/Debug/Chromium.app /Applications
 
 # TO DO
+# must update .gclient and set GYP_DEFINES before building - see http://stackoverflow.com/questions/13316437/insert-lines-in-a-file-starting-from-a-specific-line
 # output everything to stdout and $LOGFILE
 # add ccache support - check for existence, proper versioning, update/patch to correct version, compile with it
 # search for @#@ as an in-line to do marker thoughout the script
@@ -190,6 +191,21 @@ else
 	echo "./config.txt does not exist, proceeding with defaults - no google APIs will be installed" | tee -a $LOGFILE
 fi
 
+echo "Building local gclient config file for build using gclient config https://src.chromium.org/svn/trunk/src https://chromium-status.appspot.com/lkgr" | tee -a $LOGFILE
+gclient config https://src.chromium.org/svn/trunk/src https://chromium-status.appspot.com/lkgr
+if [[ $? -eq 0 ]]; then
+	echo ".gclient config file successfully built" | tee -a $LOGFILE
+else
+	echo ".gclient config file failed, check console for errors, exiting" | tee -a $LOGFILE
+	exit 1;
+fi
+
+echo "Choose yes below for faster download, no to stick with defaults" | tee -a $LOGFILE
+read -r -p "Automatically tweak .gclient config file for faster download/build time? (Y/n) " response
+	if [[ $response =~ ^([yY][eE][sS]|[yY])$ ]]; then
+		# how to edit .gclient file?
+	else
+		echo "User chose not to tweak .gclient config file, proceeding with defaults" | tee -a $LOGFILE
 
 
 ####################
@@ -236,6 +252,9 @@ fi
 	# @#@ - for example: gclient sync --revision src@##### where ##### is the latest green revision number
 	# see - https://www.ulyaoth.net/resources/tutorial-install-chromium-from-source-on-mac-os-x.43/
 
+echo "setting GYP_DEFINES for fastbuild=1" | tee -a $LOGFILE
+# @#@# - set { 'GYP_DEFINES': 'fastbuild=1' }
+# see - https://www.chromium.org/developers/gyp-environment-variables
 
 echo "building the code using ninja" | tee -a $LOGFILE
 # build the code
