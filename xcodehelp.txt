@@ -14,6 +14,9 @@ and is faster.
 
 Make sure you set System Preferences -> Energy Saver to PREVENT computer from sleeping when display turns off.
 
+After installing Xcode run the following to agree to the Xcode licenses:
+	 sudo xcodebuild
+
 You will need a cookie exporter:
 Firefox - https://addons.mozilla.org/en-US/firefox/addon/cookie-exporter/
 

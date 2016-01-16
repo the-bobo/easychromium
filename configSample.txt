@@ -5,6 +5,13 @@
 # replace NULL with the appropriate key
 # see https://sites.google.com/a/chromium.org/dev/developers/how-tos/api-keys for details
 
+# actually i think this needs to be replaced -- seems like you just need these three keys?
+    #'google_api_key':               'your_api_key',
+    #'google_default_client_id':     'your_client_id',
+    #'google_default_client_secret': 'your_client_secret',
+# see http://dev.chromium.org/developers/how-tos/api-keys
+
+
 # Chrome Remote Desktop API
 RemoteDesktop=NULL
 

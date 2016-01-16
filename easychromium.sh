@@ -5,7 +5,8 @@
 # This script installs the latest version of the open source Chromium browser for OS X
 # It pulls the code from google and builds it locally on your machine
 # Run it in the folder where you want to install Chromium
-# Suggestion: /Applications/Chromium
+	# WARNING: path to build directory must NOT contain spaces
+# After it builds cp [PATH TO YOUR CHROMIUM DIRECTORY]/Chromium/src/out/Debug/Chromium.app /Applications
 
 # TO DO
 # output everything to stdout and $LOGFILE
@@ -76,15 +77,19 @@ fi
 	# @#@ need to validate this works when user has Xcode 5.0 installed - should we check against 5.0 or 5.0.0?
 	# @#@ need to validate the if logic works for users with neither xcode nor xcode-cli installed
 	# @#@ need to output path of XCode to logfile (useful for users with multiple XCode versions installed, eventually
-	#	we can enable user selecting specific versino of Xcode to build with by providing a path maybe?)
+	#	we can enable user selecting specific version of Xcode to build with by providing a path maybe?)
 
 	# sample response when Xcode is not installed but xcode-cli is:
 	# xcode-select: error: tool 'xcodebuild' requires Xcode, but active developer directory '/Library/Developer/CommandLineTools' is a command line tools instance
 	# sample response when Xcode and xcode-cli are both missing:
 	# xcode-select: note: no developer tools were found at '/Applications/Xcode.app', requesting install. Choose an option in the dialog to download the command line developer tools.
+	# sample response when Xcode 7.2 build ver 7C68 is installed (for running xcodebuild):
+	# xcodebuild: error: The directory /Users/bobo does not contain an Xcode project.
+	# sample response when Xcode 7.2 is installed, but license not agreed to:
+	# 	Agreeing to the Xcode/iOS license requires admin privileges, please re-run as root via sudo.
 
 XCODE_CHECK="$(command xcodebuild 2>&1)"
-if [[ "$XCODE_CHECK"=~"error" ]]; then
+if [[ "$XCODE_CHECK"=~"requires" ]]; then
 	echo "Xcode not found, please see xcodehelp.txt in this repository and install Xcode." | tee -a $LOGFILE
 	exit 1;
 
@@ -127,7 +132,7 @@ if [[ DEPOT_CHECK=~"not found" ]]; then
 	if [[ $response =~ ^([yY][eE][sS]|[yY])$ ]]; then
 		echo "Trying to install depot_tools, see see http://dev.chromium.org/developers/how-tos/install-depot-tools for more" | tee -a $LOGFILE
 		echo "Downloading depot_tools from https://chromium.googlesource.com/chromium/tools/depot_tools.git" | tee -a $LOGFILE
-		#git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
+		git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
 		if [[ $? -eq 0 ]]; then
 			echo "git clone successful" | tee -a $LOGFILE
 		else
@@ -139,8 +144,9 @@ if [[ DEPOT_CHECK=~"not found" ]]; then
 		export PATH=`pwd`/depot_tools:"$PATH"
 		if [[ $? - eq 0 ]]; then
 			echo "PATH updated to $PATH" | tee -a $LOGFILE
+			echo "this PATH update is non-permanent, only for this shell session" | tee -a $LOGFILE
 		else
-			echo "Error updating PATH with depot_tools, exiting"
+			echo "Error updating PATH with depot_tools, exiting" | tee -a $LOGFILE
 			exit 1;
 		fi
 	else
@@ -152,17 +158,13 @@ else
 fi
 
 
-		# depot_tools version --> $LOGFILE
-		# depot_tools path --> $LOGFILE
-			# else, "no depot_tools detected, installing depot_tools" --> $LOGFILE
-			# 
 
 echo "Software checks finished" | tee -a $LOGFILE
 
 
 ####################
 ####################
-# PRE-BUILD COMPLETE
+# PRE-BUILD END
 ####################
 ####################
 
@@ -182,20 +184,67 @@ echo "Checking for config file ./config.txt" | tee -a $LOGFILE
 if [[ -f "./config.txt" ]]; then 
 	echo "./config.txt exists, but integration not supported yet, not using - no google APIs will be installed" | tee -a $LOGFILE
 	# @#@ to do - implement scrubbing config.txt for paramaters into ./build/gyp_chromium or a GYP_DEFINES environment variable
+	# @#@ to do - or, do these need to go elsewhere? seems like we just need client id, secret, and one other? http://dev.chromium.org/developers/how-tos/api-keys
+	# @#@ - after importing keys run gclient sync, test to make sure runs successfully
 else
 	echo "./config.txt does not exist, proceeding with defaults - no google APIs will be installed" | tee -a $LOGFILE
 fi
 
 
+
+####################
+####################
+# BUILD SETUP END
+####################
+####################
+
+echo "#### BUILD SETUP COMPLETE ####" | tee -a $LOGFILE
+
+####################
+####################
+# BUILD BEGIN
+####################
+####################
+
+echo "#### BEGIN BUILD ####" | tee -a $LOGFILE
+
+# check waterfall status
+
 echo "Checking waterfall to confirm Tree is Open - this is not implemented yet, assuimg Tree OPEN" | tee -a $LOGFILE
 	# @#@ see https://build.chromium.org/p/chromium/console and https://build.chromium.org/p/chromium/json/help
 	# appears to have a JSON API but not sure how to poll it
 	# need to implement automatic confirmation of open status on tree before proceeding 
+	# see also http://chromium.googlecode.com/svn-history/r4675/wiki/UsefulURLs.wiki
+	# appears that http://chromium-status.appspot.com/lkgr provides a commit hash of last known good revision
+	# and https://build.chromium.org/p/chromium/lkgr-status/ includes a link for that hash
+	# example: https://chromium.googlesource.com/chromium/src/+/ba29be9b6599986753d10305513c10a87f0764d8
+		# what's after /+/ is the hash returned by /lkgr and linked to on /lkgr-status
+
+echo "Fetching fresh stable version of the code, ~6.5GB expected" | tee -a $LOGFILE
+echo "Future versions of this script should permit updating a current fetch instead of fetching full source" | tee -a $LOGFILE
+
+# get the shallow version of the code, ~6.5GB: 
+fetch --nohooks --no-history chromium 
+if [[ $? -eq 0 ]]; then
+	echo "code successfully fetched" | tee -a $LOGFILE
+else
+	echo "code fetch failed, check console for errors, exiting" | tee -a $LOGFILE
+	exit 1;
+fi
+	# should this be "gclient sync" instead? see - https://www.ulyaoth.net/resources/tutorial-install-chromium-from-source-on-mac-os-x.43/
+	# @#@ - fetching code should allow updating the code instead of pulling down a fresh copy
+	# @#@ - for example: gclient sync --revision src@##### where ##### is the latest green revision number
+	# see - https://www.ulyaoth.net/resources/tutorial-install-chromium-from-source-on-mac-os-x.43/
 
 
+echo "building the code using ninja" | tee -a $LOGFILE
+# build the code
+ninja -C out/Debug chrome
 
-####################
-# BUILD SETUP END
-####################
-
-echo "#### BUILD SETUP COMPLETE ####" | tee -a $LOGFILE
+if [[ $? -eq 0 ]]; then
+	echo "Chromium successfully built, exiting without errors" | tee -a $LOGFILE
+	exit 0;
+else
+	echo "Chromium build failed, check console for errors, exiting" | tee -a $LOGFILE
+	exit 1;
+fi
