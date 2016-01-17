@@ -11,10 +11,19 @@
 # Warning - in bash if [[ whatever ]] is not a normal if conditional, it just
 # tests if the command whatever succesfully executes (looks at its exit code)
 
-# TO DO
-# must set GYP_DEFINES before building 
+# TO DO ONE
+# add auto-updating - can be accomplished with careful management of lkgr hashes, but 
+# need to differentiate between initial checkout and upgrade checkout, because gclient sync is broken otherwise
+# see https://code.google.com/p/chromium/issues/detail?id=230691#c36 and https://code.google.com/p/chromium/issues/detail?id=109191
+
+# TO DO TWO
 # change commands to output everything to stdout and $LOGFILE simultaneously - this avoids doubling the command
-# text in a $LOGFILE / stdout output and for the actual execution of the command
+# 	text in a $LOGFILE / stdout output and for the actual execution of the command
+
+# TO DO THREE
+# need to add a version number to this script so it can respond to bash easychromium.sh --version (or -version or -v)
+
+# TO DO BONUS
 # add ccache support - check for existence, proper versioning, update/patch to correct version, compile with it
 # search for @#@ as an in-line to do marker thoughout the script
 
@@ -200,8 +209,18 @@ else
 	echo "./config.txt does not exist, proceeding with defaults - no google APIs will be installed" | tee -a $LOGFILE
 fi
 
-echo "Building local gclient config file for build using gclient config https://chromium.googlesource.com/chromium/src.git https://chromium-status.appspot.com/lkgr" | tee -a $LOGFILE
-gclient config https://chromium.googlesource.com/chromium/src.git https://chromium-status.appspot.com/lkgr
+if [[ -f "./.gclient" ]]; then
+	echo ".gclient already exists, using it"
+else
+	echo ".gclient not found, building"
+
+	echo "Building local gclient config file for build using gclient config https://chromium.googlesource.com/chromium/src.git https://chromium-status.appspot.com/lkgr" | tee -a $LOGFILE
+# note: see http://stackoverflow.com/a/27853827/3277902 and https://www.ulyaoth.net/resources/tutorial-install-chromium-from-source-on-mac-os-x.43/
+# for the thoughts behind the safesync url and the git url; lkgr is last known good revision
+# # @#@ - evidently you have to fetch a fresh version first before using a safesync url - see https://code.google.com/p/chromium/issues/detail?id=230691#c36
+#gclient config https://chromium.googlesource.com/chromium/src.git https://chromium-status.appspot.com/lkgr
+gclient config https://chromium.googlesource.com/chromium/src.git
+
 if [[ $? -eq 0 ]]; then
 	echo ".gclient config file successfully built" | tee -a $LOGFILE
 else
@@ -244,6 +263,10 @@ read -r -p "Automatically tweak .gclient config file for faster download/build t
 		echo "$file" | tee -a $LOGFILE
 	fi
 
+fi
+
+
+
 
 ####################
 ####################
@@ -275,10 +298,19 @@ echo "Checking waterfall to confirm Tree is Open - this is not implemented yet, 
 
 echo "Fetching fresh stable version of the code, ~6.5GB expected" | tee -a $LOGFILE
 echo "Future versions of this script should permit updating a current fetch instead of fetching full source" | tee -a $LOGFILE
+# @#@ - evidently you have to fetch a fresh version first before using a safesync url - see https://code.google.com/p/chromium/issues/detail?id=230691#c36
+#echo "fetching this last known good revision (hash): " | tee -a $LOGFILE
+#curl https://chromium-status.appspot.com/lkgr | tee -a $LOGFILE
+echo ""
+
 
 # get the shallow version of the code, ~6.5GB: 
 # @#@ - GET THE CODE
-# fetch --nohooks --no-history chromium 
+#fetch --nohooks --no-history chromium 
+# for some reason using fetch will not work, even without a safesync url specified in the .gclient - documentation is
+# not very good for building Chromium...
+
+gclient sync --nohooks --no-history
 if [[ $? -eq 0 ]]; then
 	echo "code successfully fetched" | tee -a $LOGFILE
 else
@@ -288,17 +320,26 @@ fi
 	# should this be "gclient sync" instead? see - https://www.ulyaoth.net/resources/tutorial-install-chromium-from-source-on-mac-os-x.43/
 	# @#@ - fetching code should allow updating the code instead of pulling down a fresh copy
 	# @#@ - for example: gclient sync --revision src@##### where ##### is the latest green revision number
+	# can use curl https://chromium-status.appspot.com/lkgr to grab the last known good revision number
+	# then need a way to compare that hash value to the hash value of the current build installed, maybe by 
+	# checking against a previous logfile? if this hash number is that important it should be output as a 
+	# separate logfile, like: lkgr.log or something, upon build -- can use this to check for updates
 	# see - https://www.ulyaoth.net/resources/tutorial-install-chromium-from-source-on-mac-os-x.43/
 
 echo "setting GYP_DEFINES for fastbuild=1" | tee -a $LOGFILE
-# SET GYP_DEFINES
-# @#@# - set { 'GYP_DEFINES': 'fastbuild=1' }
+./build/gyp_chromium -Dfastbuild=1
 # see - https://www.chromium.org/developers/gyp-environment-variables
+if [[ $? -eq 0 ]]; then
+	echo "GYP_DEFINES successfuly set" | tee -a $LOGFILE
+else
+	echo "GYP_DEFINES failed to set, exiting" | tee -a $LOGFILE
+	exit 1;
+fi
 
 echo "building the code using ninja" | tee -a $LOGFILE
 # build the code
 # @#@ - ENABLE BUILDING
-# ninja -C out/Debug chrome
+ninja -C out/Debug chrome
 
 if [[ $? -eq 0 ]]; then
 	echo "Chromium successfully built, exiting without errors" | tee -a $LOGFILE
