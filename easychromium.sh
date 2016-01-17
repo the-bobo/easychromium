@@ -13,7 +13,8 @@
 
 # TO DO ONE
 # add auto-updating - can be accomplished with careful management of lkgr hashes, but 
-# need to differentiate between initial checkout and upgrade checkout, because gclient sync is broken otherwise
+# need to differentiate between initial checkout and upgrade checkout, because gclient sync is broken if using
+# safesync-url on first checkout
 # see https://code.google.com/p/chromium/issues/detail?id=230691#c36 and https://code.google.com/p/chromium/issues/detail?id=109191
 
 # TO DO TWO
@@ -310,7 +311,20 @@ echo ""
 # for some reason using fetch will not work, even without a safesync url specified in the .gclient - documentation is
 # not very good for building Chromium...
 
-gclient sync --nohooks --no-history
+gclient sync --nohooks --no-history --verbose --verbose --verbose | tee -a $LOGFILE
+# can get partial gclient sync output on screen with --verbose --verbose --verbose
+	# | tee -a $LOGFILE at the end will not append to $LOGFILE
+	# still am not getting the output for the git download progress
+	# we can't get this output without modifying depot_tools/gclient_utils.py
+	# edits should be around this line:   print >> task_item.outbuf, '[%s] Started.' % Elapsed(task_item.start)
+	# should wait ~30min for first output to come on stdout
+
+# can't get gclient sync's output on the screen or in logfile, we've tried:
+	# &>> $LOGFILE
+	# >> $LOGFILE
+	# 2>&1
+	# --output-json $LOGFILE
+	# --output-json ./tmp.json
 if [[ $? -eq 0 ]]; then
 	echo "code successfully fetched" | tee -a $LOGFILE
 else
