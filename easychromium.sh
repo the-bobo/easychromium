@@ -9,7 +9,7 @@
 # After it builds cp [PATH TO YOUR CHROMIUM DIRECTORY]/Chromium/src/out/Debug/Chromium.app /Applications
 
 # TO DO
-# must update .gclient and set GYP_DEFINES before building - see http://stackoverflow.com/questions/13316437/insert-lines-in-a-file-starting-from-a-specific-line
+# must set GYP_DEFINES before building 
 # output everything to stdout and $LOGFILE
 # add ccache support - check for existence, proper versioning, update/patch to correct version, compile with it
 # search for @#@ as an in-line to do marker thoughout the script
@@ -89,12 +89,12 @@ fi
 	# sample response when Xcode 7.2 is installed, but license not agreed to:
 	# 	Agreeing to the Xcode/iOS license requires admin privileges, please re-run as root via sudo.
 
-XCODE_CHECK="$(command xcodebuild 2>&1)"
-if [[ "$XCODE_CHECK"=~"requires" ]]; then
+XCODE_CHECK="$(command xcodebuild -version 2>&1)"
+if [[ "$XCODE_CHECK" =~ "requires" ]]; then
 	echo "Xcode not found, please see xcodehelp.txt in this repository and install Xcode." | tee -a $LOGFILE
 	exit 1;
 
-elif [[ "$XCODE_CHECK"=~"note" ]]; then
+elif [[ "$XCODE_CHECK" =~ "note" ]]; then
 	echo "Xcode and xcode-cli not found, please see xcodehelp.txt in this repository and install Xcode." | tee -a $LOGFILE
 	exit 1;
 
@@ -104,9 +104,10 @@ else
 		[[ $("$cmd" -version) =~ ([0-9][.][0-9.]*) ]] && version="${BASH_REMATCH[1]}"
 		if ! awk -v ver="$version" 'BEGIN { if (ver < 5.0) exit 1; }'; then
 			echo 'ERROR: '$cmd' version 5.0 or higher required' | tee -a $LOGFILE
-			echo 'Version detected was: '$version | tee -a $LOGFILE
+			echo 'XCode version detected was: '$version | tee -a $LOGFILE
 			exit 1;
 		fi
+		echo 'XCode version detected was: '$version | tee -a $LOGFILE
 	done
 fi
 
@@ -126,28 +127,31 @@ fi
 	# see http://commondatastorage.googleapis.com/chrome-infra-docs/flat/depot_tools/docs/html/depot_tools.html
 
 DEPOT_CHECK="$(command -V gclient 2>&1)"
-if [[ DEPOT_CHECK=~"not found" ]]; then
+if [[ DEPOT_CHECK =~ "not found" ]]; then
 	echo "depot_tools not found, try checking your PATH" | tee -a $LOGFILE
 	echo "Alternatively, easychromium can try to install depot_tools for you." | tee -a $LOGFILE
 	read -r -p "Install depot_tools? (Y/n) " response
+
 	if [[ $response =~ ^([yY][eE][sS]|[yY])$ ]]; then
 		echo "Trying to install depot_tools, see see http://dev.chromium.org/developers/how-tos/install-depot-tools for more" | tee -a $LOGFILE
 		echo "Downloading depot_tools from https://chromium.googlesource.com/chromium/tools/depot_tools.git" | tee -a $LOGFILE
 		git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
+
 		if [[ $? -eq 0 ]]; then
 			echo "git clone successful" | tee -a $LOGFILE
+			echo "Exporting depot_tools to PATH" | tee -a $LOGFILE
+			export PATH=`pwd`/depot_tools:"$PATH"
+
+			if [[ $? -eq 0 ]]; then
+				echo "PATH updated to $PATH" | tee -a $LOGFILE
+				echo "this PATH update is non-permanent, only for this shell session" | tee -a $LOGFILE
+
+			else
+				echo "Error updating PATH with depot_tools, exiting" | tee -a $LOGFILE
+				exit 1;
+			fi
 		else
 			echo "git clone of depot_tools failed, exiting" | tee -a $LOGFILE
-			exit 1;
-		fi
-		
-		echo "Exporting depot_tools to PATH" | tee -a $LOGFILE
-		export PATH=`pwd`/depot_tools:"$PATH"
-		if [[ $? - eq 0 ]]; then
-			echo "PATH updated to $PATH" | tee -a $LOGFILE
-			echo "this PATH update is non-permanent, only for this shell session" | tee -a $LOGFILE
-		else
-			echo "Error updating PATH with depot_tools, exiting" | tee -a $LOGFILE
 			exit 1;
 		fi
 	else
@@ -203,8 +207,7 @@ fi
 echo "Choose yes below for faster download, no to stick with defaults" | tee -a $LOGFILE
 read -r -p "Automatically tweak .gclient config file for faster download/build time? (Y/n) " response
 	if [[ $response =~ ^([yY][eE][sS]|[yY])$ ]]; then
-		# how to edit .gclient file?
-		insert="    \"src\/third_party\/WebKit\/LayoutTests\": None,"'\
+∂		insert="    \"src\/third_party\/WebKit\/LayoutTests\": None,"'\
 		'"    \"src\/chrome\/tools\/test\/reference_build\/chrome\": None,"'\
 		'"    \"src\/chrome_frame\/tools\/test\/reference_build\/chrome\": None,"'\
 		'"    \"src\/chrome\/tools\/test\/reference_build\/chrome_linux\": None,"'\
@@ -219,12 +222,13 @@ read -r -p "Automatically tweak .gclient config file for faster download/build t
 		# see http://stackoverflow.com/a/28592391
 		# the actual newline instead of \n is necessary because OS X's old BSD sed is weird
 		# see http://stackoverflow.com/a/24276470/3277902 for the comprehensive BSD/linux sed differences
+		# this was helpful also: http://stackoverflow.com/questions/13316437/insert-lines-in-a-file-starting-from-a-specific-line
 		if [[ $? -eq 0 ]]; then
 			echo ".gclient config file successfully tweaked, appending content to logfile" | tee -a $LOGFILE
 			file="$(cat ./.gclient)"
 			echo "$file" | tee -a $LOGFILE
 		else
-			echo ".gclient config file tweaks failed, appending .gclient to logfile and TERMINATING" | tee -a $LOGFILE
+			echo ".gclient config file tweaks failed, appending .gclient to logfile and conservatively terminating" | tee -a $LOGFILE
 			file="$(cat./.gclient)"
 			echo "$file" | tee -a $LOGFILE
 			exit 1;
