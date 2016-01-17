@@ -8,9 +8,13 @@
 	# WARNING: path to build directory must NOT contain spaces
 # After it builds cp [PATH TO YOUR CHROMIUM DIRECTORY]/Chromium/src/out/Debug/Chromium.app /Applications
 
+# Warning - in bash if [[ whatever ]] is not a normal if conditional, it just
+# tests if the command whatever succesfully executes (looks at its exit code)
+
 # TO DO
 # must set GYP_DEFINES before building 
-# output everything to stdout and $LOGFILE
+# change commands to output everything to stdout and $LOGFILE simultaneously - this avoids doubling the command
+# text in a $LOGFILE / stdout output and for the actual execution of the command
 # add ccache support - check for existence, proper versioning, update/patch to correct version, compile with it
 # search for @#@ as an in-line to do marker thoughout the script
 
@@ -99,7 +103,7 @@ elif [[ "$XCODE_CHECK" =~ "note" ]]; then
 	exit 1;
 
 else
-	echo "Xcode detected, testing version" | tee -a LOGFILE
+	echo "Xcode detected, testing version" | tee -a $LOGFILE
 	for cmd in xcodebuild; do
 		[[ $("$cmd" -version) =~ ([0-9][.][0-9.]*) ]] && version="${BASH_REMATCH[1]}"
 		if ! awk -v ver="$version" 'BEGIN { if (ver < 5.0) exit 1; }'; then
@@ -127,7 +131,8 @@ fi
 	# see http://commondatastorage.googleapis.com/chrome-infra-docs/flat/depot_tools/docs/html/depot_tools.html
 
 DEPOT_CHECK="$(command -V gclient 2>&1)"
-if [[ DEPOT_CHECK =~ "not found" ]]; then
+echo "depot var: $DEPOT_CHECK"
+if [[ $DEPOT_CHECK =~ "not found" ]]; then
 	echo "depot_tools not found, try checking your PATH" | tee -a $LOGFILE
 	echo "Alternatively, easychromium can try to install depot_tools for you." | tee -a $LOGFILE
 	read -r -p "Install depot_tools? (Y/n) " response
@@ -195,8 +200,8 @@ else
 	echo "./config.txt does not exist, proceeding with defaults - no google APIs will be installed" | tee -a $LOGFILE
 fi
 
-echo "Building local gclient config file for build using gclient config https://src.chromium.org/svn/trunk/src https://chromium-status.appspot.com/lkgr" | tee -a $LOGFILE
-gclient config https://src.chromium.org/svn/trunk/src https://chromium-status.appspot.com/lkgr
+echo "Building local gclient config file for build using gclient config https://chromium.googlesource.com/chromium/src.git https://chromium-status.appspot.com/lkgr" | tee -a $LOGFILE
+gclient config https://chromium.googlesource.com/chromium/src.git https://chromium-status.appspot.com/lkgr
 if [[ $? -eq 0 ]]; then
 	echo ".gclient config file successfully built" | tee -a $LOGFILE
 else
@@ -207,7 +212,7 @@ fi
 echo "Choose yes below for faster download, no to stick with defaults" | tee -a $LOGFILE
 read -r -p "Automatically tweak .gclient config file for faster download/build time? (Y/n) " response
 	if [[ $response =~ ^([yY][eE][sS]|[yY])$ ]]; then
-∂		insert="    \"src\/third_party\/WebKit\/LayoutTests\": None,"'\
+		insert="    \"src\/third_party\/WebKit\/LayoutTests\": None,"'\
 		'"    \"src\/chrome\/tools\/test\/reference_build\/chrome\": None,"'\
 		'"    \"src\/chrome_frame\/tools\/test\/reference_build\/chrome\": None,"'\
 		'"    \"src\/chrome\/tools\/test\/reference_build\/chrome_linux\": None,"'\
@@ -272,7 +277,8 @@ echo "Fetching fresh stable version of the code, ~6.5GB expected" | tee -a $LOGF
 echo "Future versions of this script should permit updating a current fetch instead of fetching full source" | tee -a $LOGFILE
 
 # get the shallow version of the code, ~6.5GB: 
-fetch --nohooks --no-history chromium 
+# @#@ - GET THE CODE
+# fetch --nohooks --no-history chromium 
 if [[ $? -eq 0 ]]; then
 	echo "code successfully fetched" | tee -a $LOGFILE
 else
@@ -285,12 +291,14 @@ fi
 	# see - https://www.ulyaoth.net/resources/tutorial-install-chromium-from-source-on-mac-os-x.43/
 
 echo "setting GYP_DEFINES for fastbuild=1" | tee -a $LOGFILE
+# SET GYP_DEFINES
 # @#@# - set { 'GYP_DEFINES': 'fastbuild=1' }
 # see - https://www.chromium.org/developers/gyp-environment-variables
 
 echo "building the code using ninja" | tee -a $LOGFILE
 # build the code
-ninja -C out/Debug chrome
+# @#@ - ENABLE BUILDING
+# ninja -C out/Debug chrome
 
 if [[ $? -eq 0 ]]; then
 	echo "Chromium successfully built, exiting without errors" | tee -a $LOGFILE
