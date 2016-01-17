@@ -204,24 +204,31 @@ echo "Choose yes below for faster download, no to stick with defaults" | tee -a 
 read -r -p "Automatically tweak .gclient config file for faster download/build time? (Y/n) " response
 	if [[ $response =~ ^([yY][eE][sS]|[yY])$ ]]; then
 		# how to edit .gclient file?
-		: <<'COMMENT'
-		echo "testing line insertion in .gclient"
-		filetext="$(cat ./.gclient)"
-		echo "$filetext"
-		insert='    FOO'
+		insert="    \"src\/third_party\/WebKit\/LayoutTests\": None,"'\
+		'"    \"src\/chrome\/tools\/test\/reference_build\/chrome\": None,"'\
+		'"    \"src\/chrome_frame\/tools\/test\/reference_build\/chrome\": None,"'\
+		'"    \"src\/chrome\/tools\/test\/reference_build\/chrome_linux\": None,"'\
+		'"    \"src\/chrome\/tools\/test\/reference_build\/chrome_mac\": None,"'\
+		'"    \"src\/third_party\/hunspell_dictionaries\": None,"
 		match='    "custom_deps" : {'
-		#match='solutions'
-		echo "match: $match"
+		# do NOT change indentation of the sed command on following line:
+		sed -i "" "s/$match/$match"'\
+'"$insert/" .gclient
+		# notes: 
 		# the empty "" is needed because sed -i on OS X expects a mandatory file extension, which .gclient lacks
 		# see http://stackoverflow.com/a/28592391
 		# the actual newline instead of \n is necessary because OS X's old BSD sed is weird
 		# see http://stackoverflow.com/a/24276470/3277902 for the comprehensive BSD/linux sed differences
-		sed -i "" "s/$match/$match"'\
-		'"$insert/" .gclient
-		echo "new file"
-		cat .gclient
-COMMENT
-
+		if [[ $? -eq 0 ]]; then
+			echo ".gclient config file successfully tweaked, appending content to logfile" | tee -a $LOGFILE
+			file="$(cat ./.gclient)"
+			echo "$file" | tee -a $LOGFILE
+		else
+			echo ".gclient config file tweaks failed, appending .gclient to logfile and TERMINATING" | tee -a $LOGFILE
+			file="$(cat./.gclient)"
+			echo "$file" | tee -a $LOGFILE
+			exit 1;
+		fi
 	else
 		echo "User chose not to tweak .gclient config file, proceeding with defaults" | tee -a $LOGFILE
 		file="$(cat ./.gclient)"
