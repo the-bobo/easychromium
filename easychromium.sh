@@ -341,7 +341,7 @@ fi
 	# see - https://www.ulyaoth.net/resources/tutorial-install-chromium-from-source-on-mac-os-x.43/
 
 echo "setting GYP_DEFINES for fastbuild=1" | tee -a $LOGFILE
-./build/gyp_chromium -Dfastbuild=1
+./src/build/gyp_chromium -Dfastbuild=1 | tee -a $LOGFILE
 # see - https://www.chromium.org/developers/gyp-environment-variables
 if [[ $? -eq 0 ]]; then
 	echo "GYP_DEFINES successfuly set" | tee -a $LOGFILE
