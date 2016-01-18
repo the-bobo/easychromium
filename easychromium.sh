@@ -2,6 +2,8 @@
 
 # run by typing: bash easychromium.sh
 
+# you need: XCode 5+, OSX 10.9+, ~5-10GB of space, ~3-5 hours
+
 # This script installs the latest version of the open source Chromium browser for OS X
 # It pulls the code from google and builds it locally on your machine
 # Run it in the folder where you want to install Chromium
@@ -16,16 +18,17 @@
 # need to differentiate between initial checkout and upgrade checkout, because gclient sync is broken if using
 # safesync-url on first checkout
 # see https://code.google.com/p/chromium/issues/detail?id=230691#c36 and https://code.google.com/p/chromium/issues/detail?id=109191
+# maybe just have user tell us if we should run update script or fresh install script?
 
 # TO DO TWO
 # change commands to output everything to stdout and $LOGFILE simultaneously - this avoids doubling the command
-# 	text in a $LOGFILE / stdout output and for the actual execution of the command
+# 	text in a $LOGFILE / stdout output and for the actual execution of the command. Maybe a here-doc?
 
 # TO DO THREE
 # need to add a version number to this script so it can respond to bash easychromium.sh --version (or -version or -v)
 
 # TO DO BONUS
-# add ccache support - check for existence, proper versioning, update/patch to correct version, compile with it
+# add ccache support - check for existence of ccache, proper versioning, update/patch to correct version, compile with it
 # search for @#@ as an in-line to do marker thoughout the script
 
 ####################
@@ -284,6 +287,9 @@ echo "#### BUILD SETUP COMPLETE ####" | tee -a $LOGFILE
 ####################
 
 echo "#### BEGIN BUILD ####" | tee -a $LOGFILE
+echo "#### NO MORE INTERACTION REQUIRED ####" | tee -a $LOGFILE
+echo "#### NO MORE INTERACTION REQUIRED ####" | tee -a $LOGFILE
+echo "#### NO MORE INTERACTION REQUIRED ####" | tee -a $LOGFILE
 
 # check waterfall status
 
@@ -340,7 +346,7 @@ fi
 	# separate logfile, like: lkgr.log or something, upon build -- can use this to check for updates
 	# see - https://www.ulyaoth.net/resources/tutorial-install-chromium-from-source-on-mac-os-x.43/
 
-echo "setting GYP_DEFINES for fastbuild=1" | tee -a $LOGFILE
+echo 'setting GYP_DEFINES for fastbuild=1 using: ./src/build/gyp_chromium -Dfastbuild=1' | tee -a $LOGFILE
 ./src/build/gyp_chromium -Dfastbuild=1 | tee -a $LOGFILE
 # see - https://www.chromium.org/developers/gyp-environment-variables
 if [[ $? -eq 0 ]]; then
@@ -350,21 +356,23 @@ else
 	exit 1;
 fi
 
-echo "running gclient sync again after updating GYP_DEFINES" | tee -a $LOGFILE
-gclient sync --nohooks --no-history --verbose --verbose --verbose | tee -a $LOGFILE
+#echo "running gclient sync again after updating GYP_DEFINES" | tee -a $LOGFILE
+#gclient sync --nohooks --no-history --verbose --verbose --verbose | tee -a $LOGFILE
+echo "running gclient runhooks after updating GYP_DEFINES" | tee -a $LOGFILE
+gclient runhooks | tee -a $LOGFILE
 if [[ $? -eq 0 ]]; then
-	echo "gclient sync successful" | tee -a $LOGFILE
+	echo "gclient runhooks successful" | tee -a $LOGFILE
 else
-	echo "gclient sync failed, exiting" | tee -a $LOGFILE
+	echo "gclient runhooks failed, exiting" | tee -a $LOGFILE
 	exit 1;
 fi
 
 
 echo "building the code using ninja" | tee -a $LOGFILE
 # build the code
-# @#@ - ENABLE BUILDING
+# @#@ - on unsuccessful build the success message below outputs to console but not to $LOGFILE
 cd ./src/
-ninja -C out/Debug chrome
+ninja -C out/Debug chrome | tee -a $LOGFILE
 
 if [[ $? -eq 0 ]]; then
 	echo "Chromium successfully built, exiting without errors" | tee -a $LOGFILE
