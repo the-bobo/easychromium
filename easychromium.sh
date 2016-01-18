@@ -350,9 +350,20 @@ else
 	exit 1;
 fi
 
+echo "running gclient sync again after updating GYP_DEFINES" | tee -a $LOGFILE
+gclient sync --nohooks --no-history --verbose --verbose --verbose | tee -a $LOGFILE
+if [[ $? -eq 0 ]]; then
+	echo "gclient sync successful" | tee -a $LOGFILE
+else
+	echo "gclient sync failed, exiting" | tee -a $LOGFILE
+	exit 1;
+fi
+
+
 echo "building the code using ninja" | tee -a $LOGFILE
 # build the code
 # @#@ - ENABLE BUILDING
+cd ./src/
 ninja -C out/Debug chrome
 
 if [[ $? -eq 0 ]]; then
