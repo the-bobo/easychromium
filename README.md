@@ -5,7 +5,7 @@ Run with
 
     `bash easychromium.sh`
 
-You need: XCode 5+, OSX 10.9+, ~5-10GB of space, ~3-5 hours
+You need: XCode 5+, OS X 10.9+, ~5-10GB of space, ~3-5 hours
 
 Tested on:  
 * OS X El Capitan 10.11.2  
