@@ -14,4 +14,6 @@ gclient.py 0.7 (from depot_tools)
 
 Successfully built Chromium Version 50.0.2624.0 (64-bit)
 
-See easychromium.sh comments for to do. Pull requqests welcome.
+See easychromium.sh comments for to do. Pull requests welcome.
+
+![chromium screenshot](/blob/master/Chromium%20Screenshot.jpg)
