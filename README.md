@@ -16,4 +16,4 @@ Successfully built Chromium Version 50.0.2624.0 (64-bit)
 
 See easychromium.sh comments for to do. Pull requests welcome.
 
-![chromium screenshot](/blob/master/Chromium%20Screenshot.jpg)
+![chromium screenshot](https://raw.githubusercontent.com/the-bobo/easychromium/master/Chromium%20Screenshot.jpg)
