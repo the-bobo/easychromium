@@ -33,6 +33,64 @@
 
 ####################
 ####################
+# CONTROL FLOW
+####################
+####################
+
+if [ $# -lt 1 ]; then
+	echo "Usage : bash easychromium.sh <OPTION>"
+	echo ""
+	echo "Currently supported <OPTION>'s:  defaults, interactive"
+	echo ""
+	echo "defaults builds and installs Release version of stable branch of Chromium"
+	echo "    -defaults uses a local .gclient if one exists"
+	echo "defaults copies built Chromium to /Applications/"
+	echo "    -defaults does not replace or remove existing user profiles"
+	echo "    -move or rename existing Chromium.app files in /Applications/ to avoid overwriting"
+	echo ""
+	echo "interactive permits user interaction for various build options"
+	echo ""
+	echo "Future pull requests welcome to enable other <OPTION>'s"
+	echo "e.g.: debug, beta, canary"
+	echo ""
+	echo ""
+	exit 1;
+fi
+
+case "$1" in
+	defaults )
+	echo "Running with defaults" | tee -a $LOGFILE 
+	flag="defaults"
+	;;
+
+	interactive )
+	echo "Running with interactive" | tee -a $LOGFILE 
+	flag="interactive"
+	;;
+
+	* )
+	echo "Usage : bash easychromium.sh <OPTION>"
+	echo ""
+	echo "Currently supported <OPTION>'s:  defaults, interactive"
+	echo ""
+	echo "defaults builds and installs Release version of stable branch of Chromium"
+	echo "    -defaults uses a local .gclient if one exists"
+	echo "defaults copies built Chromium to /Applications/"
+	echo "    -defaults does not replace or remove existing user profiles"
+	echo "    -move or rename existing Chromium.app file in /Applications/ to avoid overwriting"
+	echo ""
+	echo "interactive permits user interaction for various build options"
+	echo ""
+	echo "Future pull requests welcome to enable other <OPTION>'s"
+	echo "e.g.: debug, beta, canary"
+	echo ""
+	echo ""
+	exit 1;
+	;;
+esac
+
+####################
+####################
 # PRE-BUILD BEGIN
 ####################
 ####################
@@ -148,7 +206,23 @@ echo "depot var: $DEPOT_CHECK"
 if [[ $DEPOT_CHECK =~ "not found" ]]; then
 	echo "depot_tools not found, try checking your PATH" | tee -a $LOGFILE
 	echo "Alternatively, easychromium can try to install depot_tools for you." | tee -a $LOGFILE
+	
+	case "$flag" in
+	defaults )
+	echo "flag is defaults, choosing yes for auto-installing depot_tools" | tee -a $LOGFILE
+	response="yes"
+	;;
+
+	interactive )
+	echo "flag is interactive" | tee -a $LOGFILE
 	read -r -p "Install depot_tools? (Y/n) " response
+	;;
+
+	* )
+	echo "flag is unstable, defaulting to yes for auto-installing depot_tools" | tee -a $LOGFILE
+	response="yes"
+	;;
+	esac
 
 	if [[ $response =~ ^([yY][eE][sS]|[yY])$ ]]; then
 		echo "Trying to install depot_tools, see see http://dev.chromium.org/developers/how-tos/install-depot-tools for more" | tee -a $LOGFILE
@@ -214,26 +288,45 @@ else
 fi
 
 if [[ -f "./.gclient" ]]; then
-	echo ".gclient already exists, using it"
+	echo ".gclient already exists, using it" | tee -a $LOGFILE
 else
-	echo ".gclient not found, building"
+	echo ".gclient not found, building" | tee -a $LOGFILE
 
-	echo "Building local gclient config file for build using gclient config https://chromium.googlesource.com/chromium/src.git https://chromium-status.appspot.com/lkgr" | tee -a $LOGFILE
+	echo "Building local gclient config file for build using gclient config https://chromium.googlesource.com/chromium/src.git" | tee -a $LOGFILE
+	# future safesync url? probably not needed since it's canary/bleeding edge - https://chromium-status.appspot.com/lkgr
 # note: see http://stackoverflow.com/a/27853827/3277902 and https://www.ulyaoth.net/resources/tutorial-install-chromium-from-source-on-mac-os-x.43/
 # for the thoughts behind the safesync url and the git url; lkgr is last known good revision
 # # @#@ - evidently you have to fetch a fresh version first before using a safesync url - see https://code.google.com/p/chromium/issues/detail?id=230691#c36
 #gclient config https://chromium.googlesource.com/chromium/src.git https://chromium-status.appspot.com/lkgr
 gclient config https://chromium.googlesource.com/chromium/src.git
 
-if [[ $? -eq 0 ]]; then
-	echo ".gclient config file successfully built" | tee -a $LOGFILE
-else
-	echo ".gclient config file failed, check console for errors, exiting" | tee -a $LOGFILE
-	exit 1;
-fi
+	if [[ $? -eq 0 ]]; then
+		echo ".gclient config file successfully built" | tee -a $LOGFILE
+	else
+		echo ".gclient config file failed, check console for errors, exiting" | tee -a $LOGFILE
+		exit 1;
+	fi
 
-echo "Choose yes below for faster download, no to stick with defaults" | tee -a $LOGFILE
-read -r -p "Automatically tweak .gclient config file for faster download/build time? (Y/n) " response
+# DO NOT CHANGE INDENTATION
+	# yes we're still inside the ".gclient not found, building" else statement
+
+case "$flag" in
+	defaults )
+	echo "flag is defaults, choosing yes for tweaking .gclient config file" | tee -a $LOGFILE
+	response="yes"
+	;;
+
+	interactive )
+	echo "flag is interactive" | tee -a $LOGFILE
+	read -r -p "Automatically tweak .gclient config file for faster download/build time? (Y/n) " response
+	;;
+
+	* )
+	echo "flag is unstable, defaulting to yes for tweaking .gclient config file" | tee -a $LOGFILE
+	response="yes"
+	;;
+esac
+
 	if [[ $response =~ ^([yY][eE][sS]|[yY])$ ]]; then
 		insert="    \"src\/third_party\/WebKit\/LayoutTests\": None,"'\
 		'"    \"src\/chrome\/tools\/test\/reference_build\/chrome\": None,"'\
@@ -268,8 +361,6 @@ read -r -p "Automatically tweak .gclient config file for faster download/build t
 	fi
 
 fi
-
-
 
 
 ####################
@@ -346,8 +437,8 @@ fi
 	# separate logfile, like: lkgr.log or something, upon build -- can use this to check for updates
 	# see - https://www.ulyaoth.net/resources/tutorial-install-chromium-from-source-on-mac-os-x.43/
 
-echo 'setting GYP_DEFINES for fastbuild=1 using: ./src/build/gyp_chromium -Dfastbuild=1' | tee -a $LOGFILE
-./src/build/gyp_chromium -Dfastbuild=1 | tee -a $LOGFILE
+echo 'setting GYP_DEFINES using: ./src/build/gyp_chromium -Dfastbuild=1 -Dmac_strip_release=1' | tee -a $LOGFILE
+./src/build/gyp_chromium -Dfastbuild=1 -Dmac_strip_release=1 | tee -a $LOGFILE
 # see - https://www.chromium.org/developers/gyp-environment-variables
 if [[ $? -eq 0 ]]; then
 	echo "GYP_DEFINES successfuly set" | tee -a $LOGFILE
@@ -368,11 +459,12 @@ else
 fi
 
 
-echo "building the code using ninja" | tee -a $LOGFILE
+echo 'building Release version using ninja -C out/Release chrome' | tee -a $LOGFILE
+echo 'cd ./src/' | tee -a $LOGFILE
 # build the code
 # @#@ - on unsuccessful build the success message below outputs to console but not to $LOGFILE
 cd ./src/
-ninja -C out/Debug chrome | tee -a $LOGFILE
+ninja -C out/Release chrome | tee -a $LOGFILE
 
 if [[ $? -eq 0 ]]; then
 	echo "Chromium successfully built, exiting without errors" | tee -a $LOGFILE
