@@ -62,6 +62,8 @@ rm releases
 #	./src/build/gyp_chromium -Dfastbuild=1 -Dmac_strip_release=1 -Dbuildtype=Official 
 #	gclient runhooks
 
+#	Okay, the above five commands works fine, though i had to interrupt the second gclient sync and run it again
+
 #	okay.....when doing the gclient sync after git checkout i hang on gclient sync, it keeps saying "still working on src"
 #	the error after ctrl+c'ing looks like this: Attempting rebase onto origin... - after that line it just hangs, then 
 #	shows "interrupted" from when i ctrl+c'd
