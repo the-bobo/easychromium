@@ -409,6 +409,7 @@ echo ""
 # not very good for building Chromium...
 
 gclient sync --nohooks --no-history --verbose --verbose --verbose | tee -a $LOGFILE
+# this line should be edited to: gclient sync --nohooks --no-history --with_tags --verbose --verbose --verbose
 # can get partial gclient sync output on screen with --verbose --verbose --verbose
 	# | tee -a $LOGFILE at the end will not append to $LOGFILE
 	# still am not getting the output for the git download progress
@@ -439,6 +440,7 @@ fi
 
 echo 'setting GYP_DEFINES using: ./src/build/gyp_chromium -Dfastbuild=1 -Dmac_strip_release=1' | tee -a $LOGFILE
 ./src/build/gyp_chromium -Dfastbuild=1 -Dmac_strip_release=1 | tee -a $LOGFILE
+# should be edited to ./src/build/gyp_chromium -Dfastbuild=1 -Dmac_strip_release=1 -Dbuildtype=Official | tee -a $LOGFILE
 # see - https://www.chromium.org/developers/gyp-environment-variables
 if [[ $? -eq 0 ]]; then
 	echo "GYP_DEFINES successfuly set" | tee -a $LOGFILE
