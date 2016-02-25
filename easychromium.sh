@@ -225,7 +225,7 @@ if [[ $DEPOT_CHECK =~ "not found" ]]; then
 	esac
 
 	if [[ $response =~ ^([yY][eE][sS]|[yY])$ ]]; then
-		echo "Trying to install depot_tools, see see http://dev.chromium.org/developers/how-tos/install-depot-tools for more" | tee -a $LOGFILE
+		echo "Trying to install depot_tools, see http://dev.chromium.org/developers/how-tos/install-depot-tools for more" | tee -a $LOGFILE
 		echo "Downloading depot_tools from https://chromium.googlesource.com/chromium/tools/depot_tools.git" | tee -a $LOGFILE
 		git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
 
@@ -255,7 +255,8 @@ else
 fi
 
 
-
+echo "Checking for updates to depot_tools by running gclient without arguments" | tee -a $LOGFILE
+gclient
 echo "Software checks finished" | tee -a $LOGFILE
 
 
