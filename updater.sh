@@ -129,6 +129,7 @@ rm releases
 #	7) sync
 #	8) checkout tag 
 #	9) build x ---- failed, going to try syncing branch heads first then building again
+#	10) after syncing branch heads (on the tag) again and then building, it worked!
 
 #	possible good version (after "new try") - you have to sync both branches twice:
 #	fetch chromium
@@ -146,12 +147,16 @@ rm releases
 #	LOGFILE="./logeasychromium.log"
 #	ninja -C out/Release chrome | tee -a $LOGFILE
 
+##################	the script should check to see if ./src exists, if yes then update, else fetch code
+##################	the checks for dependencies should happen each time regardless
+##################	updating is tricky, because it requires compiling, when should the cron job run?
 
 #	the updater script should just start at "cd src" and go from there, eventually /bin/cp (or rsync)
 #		rsync -ac --delete Chromium.app /Application/Chromium.app  (double check this)
 #	or:	/bin/cp Chromium.app /Applications/  to put the new Chromium app file to the appropriate place 
 #	go ahead and scrub omahaproxy for the correct $TARGET tag to git checkout to
 #	also, longterm someone should just release a minisigned binary, this is way too cumbersome for most users
+
 
 
 #	23rd try: /hammertest
