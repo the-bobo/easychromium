@@ -7,6 +7,9 @@
 # This script builds the latest version of the open source Chromium browser for OS X from source
 # Copy the [your folder]/src/out/Release/Chromium.app file into /Applications/ when it finishes
 
+# DOES check to see if you already have the source code downloaded
+# does NOT check to see if the current version is ahead of currently installed version
+
 
 ####################
 ####################
@@ -135,15 +138,35 @@ echo "#### PRE-BUILD COMPLETE ####" | tee -a $LOGFILE
 
 echo "#### BEGIN BUILD ####" | tee -a $LOGFILE
 
+# retrieves CSV of current Chromium releases, saves in a file "releasestargets" without extension
+curl https://omahaproxy.appspot.com/all -o releasestargets
+
+# returns the version number of the current stable Chromium release for mac, cutting on the comma 
+# sample: 48.0.2564.116
+TARGET=$(grep mac,stable, releasestargets | cut -d, -f3)
+echo "target Chromium version is: $TARGET" | tee -a $LOGFILE
+rm releasestargets
+
+
+if [ -d ./src/ ]
+	then
+	echo "./src/ found, proceeding to gclient sync master" | tee -a $LOGFILE
+else
+	echo "./src/ not found, assuming this is a fresh install, fetching chromium" | tee -a $LOGFILE
+	fetch chromium | tee -a $LOGFILE
+fi
 
 cd src
+git checkout master
 git fetch --tags origin | tee -a $LOGFILE
 export GYP_DEFINES="fastbuild=1 mac_strip_release=1 buildtype=Official"
+
 gclient sync --verbose --verbose --verbose --jobs 16 | tee -a $LOGFILE
-git checkout -b new_release tags/48.0.2564.116 | tee -a $LOGFILE
+git checkout -b new_release$TARGET tags/$TARGET | tee -a $LOGFILE
 gclient sync --verbose --verbose --verbose --with_branch_heads --jobs 16 | tee -a $LOGFILE
 git checkout master | tee -a $LOGFILE
 gclient sync --verbose --verbose --verbose --jobs 16 | tee -a $LOGFILE
-git checkout new_release | tee -a $LOGFILE
+git checkout new_release$TARGET | tee -a $LOGFILE
 gclient sync --verbose --verbose --verbose --with_branch_heads --jobs 16 | tee -a $LOGFILE
+
 ninja -C out/Release chrome | tee -a $LOGFILE
