@@ -20,4 +20,4 @@ Tested on:
 * Python 2.7.10  
 * gclient.py 0.7 (from depot_tools)  
 
-Successfully built Chromium Version 48.0.2564.116 (64-bit), the latest stable release for OSX.  
+Successfully built Chromium Version 48.0.2564.116 (64-bit), the latest stable release for OSX.
