@@ -1,5 +1,5 @@
 # easychromium
-Bash script to build and install Chromium from source on OS X  
+Bash script to build and install latest stable Chromium from source on OS X  
 
 Run with: 
 
@@ -8,6 +8,8 @@ Run with:
 Can be run as a cron job for automatic updates.  
 
 ![chromium screenshot](https://raw.githubusercontent.com/the-bobo/easychromium/master/Chromium%20Screenshot.jpg)  
+
+Copy the [your folder]/src/out/Release/Chromium.app file into /Applications/ when it finishes.  
 
 You need: git 1.9+, XCode 5+, OS X 10.9+, ~15-20GB of space, ~3-5 hours on 16GB RAM, more otherwise.
 
