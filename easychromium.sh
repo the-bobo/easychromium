@@ -8,7 +8,7 @@
 # Copy the [your folder]/src/out/Release/Chromium.app file into /Applications/ when it finishes
 
 # DOES check to see if you already have the source code downloaded
-# does NOT check to see if the current version is ahead of currently installed version
+# DOES check to see if the latest version is ahead of locally installed version
 
 
 ####################
@@ -147,6 +147,41 @@ TARGET=$(grep mac,stable, releasestargets | cut -d, -f3)
 echo "target Chromium version is: $TARGET" | tee -a $LOGFILE
 rm releasestargets
 
+if [ -d /Applications/Chromium.app/ ]
+  then
+  echo "Chromium exists in /Applications/" | tee -a $LOGFILE
+  echo "checking if latest stable release is newer than current install" | tee -a $LOGFILE
+  CURRENT=$(mdls -name kMDItemVersion /Applications/Chromium.app/ | awk '/kMDItemVersion/{print $NF}' | sed 's/"//g')
+  echo "current version is: $CURRENT"
+
+  version_1=$TARGET
+  version_2=$CURRENT
+
+	#The following bash function will return 0 (true) if $version_1 > $version_2, 1 (false) otherwise, 
+	#as long as the variables $version_1 and $version_2 both contain only an arbitrary number of digit groups separated by periods
+	#adapted from code by kopischke (credit cc-by-sa 3.0) on stack exchange: http://apple.stackexchange.com/a/86362
+
+	function versions_check {
+		while [[ $version_1 != "0" || $version_2 != "0" ]]; do
+			(( ${version_1%%.*} > ${version_2%%.*} )) && return 0
+			[[ ${version_1} =~ "." ]] && version_1="${version_1#*.}" || version_1=0
+			[[ ${version_2} =~ "." ]] && version_2="${version_2#*.}" || version_2=0
+		done
+		false
+}
+	#Implementing other comparisons, like greater or equal, is as simple as changing the comparison operator of the arithmetic 
+	#evaluation, i.e. (( ${version_1%%.*} >= "${version_2%%.*}" )).
+
+	versions_check $version_1 $version_2
+	if [[ $? -eq 0 ]]; then
+		echo "TARGET version is newer than CURRENT, proceeding to update" | tee -a $LOGFILE
+	else
+		echo "TARGET version is NOT newer than CURRENT, aborting" | tee -a $LOGFILE
+		exit 1;
+	fi
+else
+  echo "Chromium not found in /Applications/, proceeding to build from latest stable release" | tee -a $LOGFIE
+fi
 
 if [ -d ./src/ ]
 	then
@@ -159,7 +194,7 @@ fi
 cd src
 git checkout master
 git fetch --tags origin | tee -a $LOGFILE
-export GYP_DEFINES="fastbuild=1 mac_strip_release=1 buildtype=Official"
+export GYP_DEFINES="fastbuild=1 mac_strip_release=1 ffmpeg_branding=Chrome proprietary_codecs=1 buildtype=Official"
 
 gclient sync --verbose --verbose --verbose --jobs 16 | tee -a $LOGFILE
 git checkout -b new_release$TARGET tags/$TARGET | tee -a $LOGFILE
