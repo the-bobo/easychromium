@@ -1,5 +1,5 @@
 # easychromium
-Bash script to build and install Chromium from source on OS X
+Bash script to build and install Chromium from source on OS X  
 Can be run as a cron job for automatic updates
 
 Run with 
