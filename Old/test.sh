@@ -4,7 +4,7 @@
 # 	echo "my message" | tee -a ./easychromium.log
 
 # this is a multiline comment
-# : << 'COMMENT'
+# : <<'COMMENT'
 # code
 # code
 # code

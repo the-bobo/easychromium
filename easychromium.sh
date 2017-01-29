@@ -53,7 +53,19 @@ if command -V git >/dev/null 2>&1; then
 
 	for cmd in git; do
 		[[ $("$cmd" --version) =~ ([0-9][.][0-9.]*) ]] && version="${BASH_REMATCH[1]}"
-		if ! awk -v ver="$version" 'BEGIN { if (ver < 2.2.1) exit 1; }'; then
+		var1=$(echo "$version" | cut -d. -f1)
+		var2=$(echo "$version" | cut -d. -f2)
+		var3=$(echo "$version" | cut -d. -f3)
+		
+		if [[ $var1 -lt 2 ]]; then
+			echo 'ERROR: '$cmd' version 2.2.1 or higher required' | tee -a $LOGFILE
+			exit 1;
+		fi
+		if [[ $var1 -gt 2 && $var2 -lt 2 ]]; then
+			echo 'ERROR: '$cmd' version 2.2.1 or higher required' | tee -a $LOGFILE
+			exit 1;
+		fi
+		if [[ $var1 -gt 2 && $var2 -gt 2 && $var3 -lt 1 ]]; then
 			echo 'ERROR: '$cmd' version 2.2.1 or higher required' | tee -a $LOGFILE
 			exit 1;
 		fi
@@ -119,7 +131,6 @@ else
 	echo "Error updating PATH with depot_tools, exiting" | tee -a $LOGFILE
 	exit 1;
 fi
-
 
 ####################
 ####################
@@ -192,9 +203,13 @@ else
 fi
 
 cd src
+SRC_PATH=`pwd`
+echo "$SRC_PATH"
+
+
 git checkout master
 git fetch --tags origin | tee -a $LOGFILE
-export GYP_DEFINES="fastbuild=1 mac_strip_release=1 ffmpeg_branding=Chrome proprietary_codecs=1 buildtype=Official"
+# export GYP_DEFINES="fastbuild=1 mac_strip_release=1 ffmpeg_branding=Chrome proprietary_codecs=1 buildtype=Official"
 
 gclient sync --verbose --verbose --verbose --jobs 16 | tee -a $LOGFILE
 git checkout -b new_release$TARGET tags/$TARGET | tee -a $LOGFILE
@@ -202,6 +217,23 @@ gclient sync --verbose --verbose --verbose --with_branch_heads --jobs 16 | tee -
 git checkout master | tee -a $LOGFILE
 gclient sync --verbose --verbose --verbose --jobs 16 | tee -a $LOGFILE
 git checkout new_release$TARGET | tee -a $LOGFILE
+
+#export GYP_DEFINES="fastbuild=1 mac_strip_release=1 ffmpeg_branding=Chrome proprietary_codecs=1 buildtype=Official"
+
+# build args.gn (replacement for obsolete GYP_DEFINES)
+touch "args.gn"
+echo -e 'symbol_level=1\nenable_stripping=true\nffmpeg_branding="Chrome"\nproprietary_codecs=1\nis_official_build=true' > ./args.gn
+
 gclient sync --verbose --verbose --verbose --with_branch_heads --jobs 16 | tee -a $LOGFILE
 
-ninja -C out/Release chrome | tee -a $LOGFILE
+echo "after all the gclient sync my pwd is: " | tee -a $LOGFILE
+pwd | tee -a $LOGFILE
+echo "gonna try to cd to src_path" | tee -a $LOGFILE
+cd "$SRC_PATH" | tee -a $LOGFILE
+echo "my new pwd is: " | tee -a $LOGFILE
+pwd | tee -a $LOGFILE
+gn gen out/foo | tee -a $LOGFILE
+ninja -C out/foo chrome | tee -a $LOGFILE
+
+#ARG_VAR="$SRC_VAR/out/Release chrome"
+#ninja -C "$ARG_VAR"
